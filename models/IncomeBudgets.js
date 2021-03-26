@@ -1,4 +1,5 @@
 const mongoose = require( 'mongoose' );
+const { ObjectId } = mongoose.Schema.Types;
 
 const IncomeSchema = new mongoose.Schema( {
   content: {
@@ -8,7 +9,11 @@ const IncomeSchema = new mongoose.Schema( {
   values: {
     type: Number,
     required: true
+  },
+  postedBy: {
+    type: ObjectId,
+    ref: 'User'
   }
 }, { timestamps: true, } );
 
-module.exports = mongoose.model( 'Incomes', IncomeSchema );
+mongoose.model( 'Incomes', IncomeSchema );

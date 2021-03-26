@@ -5,6 +5,8 @@ const cors = require( 'cors' );
 const path = require( 'path' );
 
 require( './models/user' );
+require( './models/IncomeBudgets' );
+require( './models/expensesBudgets' );
 
 const app = express();
 const connectDB = require( './config/db' );

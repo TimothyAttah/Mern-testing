@@ -1,20 +1,37 @@
 const mongoose = require( 'mongoose' );
-const Expenses = require( '../models/expensesBudgets' );
+const Expenses = mongoose.model( 'Expenses' );
 
-const getExpenses = async ( req, res ) => {
+const getAllExpenses = async ( req, res ) => {
   try {
-    const expenses = await Expenses.find();
+    const expenses = await Expenses.find()
+      .populate( 'postedBy', '-password' );
     res.status( 201 ).json( { message: 'Success', expenses } );
   } catch (error) {
     res.status( 500 ).json( { error: error.message } );
   }
 };
 
+const getAuthExpenses = async ( req, res ) => {
+  try {
+    const authExpenses = await Expenses.find( { postedBy: req.user._id } )
+      .populate( 'postedBy', '-password' )
+    res.status( 201 ).json( authExpenses );
+  } catch (error) {
+     res.status( 500 ).json( { error: error.message } );
+  }
+}
+
 const createExpenses = async ( req, res ) => {
   const expenses = req.body;
+  const { content, values } = expenses;
   try {
-    if ( !expenses.content || !expenses.values ) return res.status( 404 ).json( { error: 'Please fill in all fields' } );
-    const newExpenses = await new Expenses( expenses );
+    if ( !content || !values ) return res.status( 404 ).json( { error: 'Please fill in all fields' } );
+    req.user.password = undefined;
+    const newExpenses = await new Expenses( {
+      content,
+      values,
+      postedBy: req.user
+    });
     await newExpenses.save();
     res.status( 201 ).json( { message: 'Expenses was created successfully', newExpenses } );
   } catch (error) {
@@ -45,7 +62,8 @@ const deleteExpenses = async ( req, res ) => {
   }
 }
 
-module.exports.getExpenses = getExpenses;
+module.exports.getAllExpenses = getAllExpenses;
+module.exports.getAuthExpenses = getAuthExpenses;
 module.exports.createExpenses = createExpenses;
 module.exports.editExpenses = editExpenses;
 module.exports.deleteExpenses = deleteExpenses;
